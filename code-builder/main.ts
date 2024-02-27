@@ -8,8 +8,8 @@ import mime from "mime-types"
 const s3 =  new S3Client({
     region: "ap-south-1",
     credentials: {
-        accessKeyId: "",
-        secretAccessKey: ""
+        accessKeyId: "AKIAZV3G4GUJGISC4SDJ",
+        secretAccessKey: "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"
     }
 })
 const PROJECT_ID = process.env.PROJECT_ID

@@ -38,21 +38,14 @@ function main() {
             const filePath = path.join(distDirPath, file)
             const stats = await fsp.lstat(filePath)
 
-            if(stats.isDirectory()) continue;
+            // TODO: upload directories inside `dist`
+            if(stats.isDirectory()) {
+                continue;
+            };
 
             console.log('Uploading now')
 
-            // TODO: upload to s3
-            console.log(`Uploading ${filePath}`)
-            const command = new PutObjectCommand({
-                Bucket: "percel",
-                Key: `${PROJECT_ID}/${file}`,
-                Body: fs.createReadStream(filePath),
-                ContentType: mime.lookup(filePath) as string
-            });
-
-            await s3.send(command)
-            console.log('uploaded')
+            await uploadToS3(file, filePath)
         }
 
         console.log("Build successful")
@@ -60,4 +53,18 @@ function main() {
     })
 }
 
+async function uploadToS3(file: string, filePath: string) {
+    console.log(`Uploading ${filePath}`)
+
+    const command = new PutObjectCommand({
+        Bucket: "percel",
+        Key: `${PROJECT_ID}/${file}`,
+        Body: fs.createReadStream(filePath),
+        ContentType: mime.lookup(filePath) as string
+    });
+
+    return s3.send(command)
+}
+
 main()
+

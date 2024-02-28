@@ -2,15 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { RunTaskCommand } from '@aws-sdk/client-ecs';
 import { generateSlug } from 'random-word-slugs';
 import { ecsClient } from './provider/ecs';
+import { CreateDeploymentDto } from './dto/create-deployment.dto';
 @Injectable()
 export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
 
-  async createDeployment({ gitUrl }: { gitUrl: string }) {
-    // TODO: add validation
-
+  async createDeployment({ gitUrl }: CreateDeploymentDto) {
     const projectSlug = generateSlug();
     const command = new RunTaskCommand({
       cluster: process.env.ECS_CLUSTER_ARN,

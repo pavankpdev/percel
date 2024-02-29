@@ -19,3 +19,4 @@ I've been building this to upskill in a lot of areas, so feel free to play aroun
 - [ ] Add support to Serverless functions
 - [ ] Support edge deployments with AWS infra
 - [ ] Support middleware with cloudflare
+- [ ] Setup CICD from source control 

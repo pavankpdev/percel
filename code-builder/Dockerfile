@@ -12,6 +12,13 @@ WORKDIR /home/app
 COPY main.ts main.ts
 COPY entrypoint.sh entrypoint.sh
 COPY package*.json .
+COPY ./utils ./utils
+COPY ./provider ./provider
+
+ENV AWS_ACCESS_KEY=<your_Key>
+ENV AWS_SECRET_KEY=<your_Key>
+ENV REDIS_EP=<your_Key>
+
 
 RUN npm install
 

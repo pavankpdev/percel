@@ -4,15 +4,16 @@ import fsp from "fs/promises"
 import fs from "fs"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import mime from "mime-types"
+import {publishLog} from "./utils/publishLog";
 
 const s3 =  new S3Client({
     region: "ap-south-1",
     credentials: {
-        accessKeyId: "",
-        secretAccessKey: ""
+        accessKeyId: process.env.AWS_ACCESS_KEY as string,
+        secretAccessKey: process.env.AWS_SECRET_KEY as string
     }
 })
-const PROJECT_ID = process.env.PROJECT_ID
+const PROJECT_ID = process.env.PROJECT_ID as string
 
 function main() {
     if(!PROJECT_ID) throw Error("PROJECT_ID not found")
@@ -22,26 +23,29 @@ function main() {
 
     p?.stdin?.on('data', function (data) {
         console.log(data.toString())
+        publishLog(data.toString(), PROJECT_ID)
     })
 
     p.stdout?.on('error', function (data) {
         console.log('Error', data.toString())
+        publishLog(data.toString(), PROJECT_ID)
     })
 
     p.on('close', async () => {
         console.log('Build Complete, uploading to S3')
+        publishLog('Build Complete, uploading to S3', PROJECT_ID)
 
         const distDirPath = path.join(outputDir, 'dist')
         await recursivelyParseFiles(distDirPath)
 
         console.log("Build successful")
-
+        publishLog('Build successful', PROJECT_ID)
     })
 }
 
 async function uploadToS3(file: string, filePath: string) {
     console.log(`Uploading ${filePath}`)
-
+    publishLog(`Uploading ${filePath}`, PROJECT_ID)
     const command = new PutObjectCommand({
         Bucket: "percel",
         Key: `${PROJECT_ID}/${file}`,
@@ -71,7 +75,6 @@ async function recursivelyParseFiles(dirPath: string) {
         if(stats.isDirectory()) {
             await recursivelyParseFiles(filePath);
         } else {
-            console.log('Uploading now')
             await uploadToS3(dirname ? `${dirname}/${distContent.name}` : distContent.name, filePath)
         }
     }

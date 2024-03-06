@@ -8,7 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway(9002, { cors: true, path: '/' })
+@WebSocketGateway(9000, { cors: true, path: '/' })
 export class WebsocketGateway {
   @WebSocketServer()
   server: Server;

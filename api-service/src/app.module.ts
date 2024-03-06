@@ -12,7 +12,7 @@ import { Logger, transports } from 'winston';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     WinstonModule.forRoot({
-      transports: [new transports.File({ filename: 'logs.log' })],
+      transports: [new transports.File({ filename: 'logs/logs.log' })],
     }),
   ],
   providers: [AppService, WebsocketGateway, RedisService, Logger],

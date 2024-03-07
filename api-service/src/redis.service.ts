@@ -1,6 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import axios from 'axios';
 import { WebsocketGateway } from './app.gateway';
+import * as process from "process";
 
 @Injectable()
 export class RedisService implements OnModuleInit {
@@ -19,6 +21,15 @@ export class RedisService implements OnModuleInit {
     this.subscriber.psubscribe('logs:*');
     this.subscriber.on('pmessage', (pattern, channel, message) => {
       console.log('REDIS:', message);
+      const elasticsearchURL = process.env.ELASTIC_SEARCH_HOST;
+      const indexName = 'nodejs-app';
+      const typeName = '_doc';
+
+      axios.post(`${elasticsearchURL}/${indexName}/${typeName}`, {
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message,
+      });
       this.websocketGateway.sendMessage(channel, message);
     });
   }

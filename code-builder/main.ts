@@ -1,64 +1,50 @@
 import {exec} from "child_process"
 import path from "path"
 import fsp from "fs/promises"
-import fs from "fs"
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import mime from "mime-types"
 import {publishLog} from "./utils/publishLog";
+import {logger} from "./utils/logger";
+import {detectFramework} from "./utils/detectFramework";
+import {uploadToS3} from "./utils/uploadToS3";
+import {buildOutputDir} from "./constants";
+import {FRAMEWORKS} from "./types";
 
-const s3 =  new S3Client({
-    region: "ap-south-1",
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY as string,
-        secretAccessKey: process.env.AWS_SECRET_KEY as string
-    }
-})
 const PROJECT_ID = process.env.PROJECT_ID as string
 
-function main() {
+async function main() {
     if(!PROJECT_ID) throw Error("PROJECT_ID not found")
     const outputDir = path.join(__dirname, 'source-code')
 
     const p = exec(`cd ${outputDir} && npm i && npm run build`)
+    const framework = await detectFramework(outputDir);
+
 
     p?.stdin?.on('data', function (data) {
-        console.log(data.toString())
         publishLog(data.toString(), PROJECT_ID)
+        logger.log({message: data.toString(), level: 'info'})
+
     })
 
     p.stdout?.on('error', function (data) {
-        console.log('Error', data.toString())
         publishLog(data.toString(), PROJECT_ID)
+        logger.log({message: data.toString(), level: 'info'})
+
     })
 
     p.on('close', async () => {
-        console.log('Build Complete, uploading to S3')
         publishLog('Build Complete, uploading to S3', PROJECT_ID)
+        logger.log({message: 'Build Complete, uploading to S3', level: 'info'})
 
-        const distDirPath = path.join(outputDir, 'dist')
-        await recursivelyParseFiles(distDirPath)
+        const distDirPath = path.join(outputDir, buildOutputDir[framework])
+        await recursivelyParseFiles(distDirPath, framework)
 
-        console.log("Build successful")
         publishLog('Build successful', PROJECT_ID)
+        logger.log({message: 'Build successful', level: 'info'})
+        process.exit(0)
     })
 }
 
-async function uploadToS3(file: string, filePath: string) {
-    console.log(`Uploading ${filePath}`)
-    publishLog(`Uploading ${filePath}`, PROJECT_ID)
-    const command = new PutObjectCommand({
-        Bucket: "percel",
-        Key: `${PROJECT_ID}/${file}`,
-        Body: fs.createReadStream(filePath),
-        ContentType: mime.lookup(filePath) as string
-    });
-
-    return s3.send(command)
-}
-
-async function recursivelyParseFiles(dirPath: string) {
+async function recursivelyParseFiles(dirPath: string, framework: FRAMEWORKS) {
     const distContents = await fsp.readdir(dirPath, { withFileTypes: true });
-
     for (const distContent of distContents) {
         const filePath = path.join(dirPath, distContent.name)
         const stats = await fsp.lstat(filePath)
@@ -66,16 +52,16 @@ async function recursivelyParseFiles(dirPath: string) {
         // Remove '/home/app/source-code/dist' so that the files are uploaded with their respective parent directory names
         // Example: /_astro/index.css
         const dirname = dirPath.replace(
-            dirPath.includes("/home/app/source-code/dist/")
-            ? "/home/app/source-code/dist/"
-            : "/home/app/source-code/dist"
+            dirPath.includes(`/home/app/source-code/${buildOutputDir[framework]}/`)
+            ? `/home/app/source-code/${buildOutputDir[framework]}/`
+            : `/home/app/source-code/${buildOutputDir[framework]}`
             , ""
         )
 
         if(stats.isDirectory()) {
-            await recursivelyParseFiles(filePath);
+            await recursivelyParseFiles(filePath, framework);
         } else {
-            await uploadToS3(dirname ? `${dirname}/${distContent.name}` : distContent.name, filePath)
+            await uploadToS3(dirname ? `${dirname}/${distContent.name}` : distContent.name, filePath, PROJECT_ID)
         }
     }
 }

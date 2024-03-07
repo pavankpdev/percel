@@ -1,0 +1,1 @@
+export type FRAMEWORKS = 'nextjs' | 'vite' | 'astro'

@@ -11,11 +11,13 @@
   "license": "ISC",
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "ts-node": "10.9.2"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.521.0",
     "ioredis": "^5.3.2",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "winston": "^3.12.0"
   }
 }

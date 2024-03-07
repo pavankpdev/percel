@@ -16,9 +16,9 @@ COPY ./utils ./utils
 COPY ./provider ./provider
 COPY ./ ./
 
-ENV AWS_ACCESS_KEY=AKIAZV3G4GUJN3RKPLBJ
-ENV AWS_SECRET_KEY=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
-ENV REDIS_EP=redis://default:1632855036514099ba87062cef28310c@us1-actual-lemming-38829.upstash.io:38829
+ENV AWS_ACCESS_KEY=<your_key>
+ENV AWS_SECRET_KEY=<your_key>
+ENV REDIS_EP=<your_key>
 
 
 RUN npm install

@@ -15,7 +15,7 @@ I've been building this to upskill in a lot of areas, so feel free to play aroun
 - [x] API endpoints to automate it
 - [x] Upload directories inside `dist` instead of just files. 
 - [x] Stream logs from the build time
-- ⏳ Stream logs to ELK stack or some other tool
+- [x] Stream logs to ELK stack or some other tool
 - [ ] Handle custom domain by checking the DB and proxy to the custom domain
 - [ ] Add support to Serverless functions
 - [ ] Support edge deployments with AWS infra

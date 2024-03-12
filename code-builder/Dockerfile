@@ -19,7 +19,7 @@ COPY ./ ./
 ENV AWS_ACCESS_KEY=<your_key>
 ENV AWS_SECRET_KEY=<your_key>
 ENV REDIS_EP=<your_key>
-
+ENV ELASTIC_SEARCH_HOST=<your_key>
 
 RUN npm install
 

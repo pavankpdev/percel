@@ -2,7 +2,6 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import axios from 'axios';
 import { WebsocketGateway } from './app.gateway';
-import * as process from "process";
 
 @Injectable()
 export class RedisService implements OnModuleInit {
